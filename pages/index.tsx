@@ -145,7 +145,12 @@ const Home: NextPage = () => {
             <button
               className="px-5 py-3 font-bold text-green-100 bg-green-700 border border-green-500 bg-opacity-30 hover:bg-opacity-50 transition-opacity rounded-lg disabled:bg-gray-700 disabled:text-white disabled:border-gray-400 block mx-auto"
               type="submit"
-              disabled={!isValid || isSubmitting || recipeMutation.isLoading}
+              disabled={
+                !isValid ||
+                isSubmitting ||
+                recipeMutation.isLoading ||
+                fields.length === 0
+              }
             >
               Let&apos;s get cooking!
             </button>
