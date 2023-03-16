@@ -4,13 +4,25 @@ import Head from "next/head";
 import { useFieldArray, useForm } from "react-hook-form";
 import PlusCircleSolid from "@/public/icons/plus-circle-solid.svg";
 import { cn } from "@/lib/cn";
-import TokenDialog from "@/components/tokenDialog";
 import { useMutation } from "@tanstack/react-query";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ReactMarkdown from "react-markdown";
 import { Transition } from "@headlessui/react";
 import Cross from "@/public/icons/close-outline.svg";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import useLocalStorage from "@/hooks/useLocalStorage";
 
 const schema = z.object({
   ingredients: z.array(z.object({ value: z.string().min(3) })),
@@ -30,15 +42,20 @@ const ingredientPlaceholders: string[] = [
 ];
 
 type FormState = {
+  token: string;
   ingredients: { value: string }[];
 };
 
 const Home: NextPage = () => {
+  const [tokenSaved, setTokenSaved] = useLocalStorage("token_saved", false);
+  const [open, setOpen] = useState(false);
+  const [text, setText] = useState("");
   const {
     control,
     register,
     handleSubmit,
     formState: { isValid, isSubmitting },
+    getValues,
   } = useForm<FormState>({
     resolver: zodResolver(schema),
   });
@@ -62,7 +79,25 @@ const Home: NextPage = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ items }),
-      }).then((res) => res.text()),
+      }),
+    onSuccess: async (data) => {
+      if (data.ok) {
+        const body = data.body;
+        const reader = body?.getReader();
+        const decoder = new TextDecoder();
+        let done = false;
+
+        if (reader) {
+          while (!done) {
+            const { value, done: doneReading } = await reader.read();
+            done = doneReading;
+            const chunkValue = decoder.decode(value);
+
+            setText((prev) => prev + chunkValue);
+          }
+        }
+      }
+    },
   });
 
   const generateRecipe = (data: FormState) => {
@@ -78,16 +113,70 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="w-full px-20 py-28 min-h-screen">
+      <main className="w-full min-h-screen px-20 bg-top bg-cover py-28 bg-mesh-orange-purple">
         <div className="absolute top-5 right-5">
-          <TokenDialog mutate={tokenMutation.mutate} />
+          <Dialog
+            open={open}
+            onOpenChange={(open) => {
+              setOpen(open);
+              if (!tokenSaved) {
+                setTokenSaved(true);
+              }
+            }}
+          >
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn({
+                  "animate-ring ease-in-out direction-alternate delay-100":
+                    !tokenSaved,
+                })}
+              >
+                Add Open AI Token
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Add Open AI Token</DialogTitle>
+                <DialogDescription className="font-lato">
+                  In order to this app to work, you should set your Open AI
+                  Token. Don&apos;t worry, we will never store it anywhere else
+                  than your browser.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="py-4">
+                <Label
+                  htmlFor="token"
+                  className="text-right dark:text-white font-lato"
+                >
+                  Your Open AI Token
+                </Label>
+                <Input
+                  id="token"
+                  {...register("token")}
+                  className="col-span-3"
+                />
+              </div>
+              <DialogFooter>
+                <Button
+                  type="submit"
+                  onClick={() => {
+                    tokenMutation.mutate(getValues("token"));
+                    setOpen(false);
+                  }}
+                >
+                  Save changes
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
-        <section className="min-h-[65vh] flex flex-col justify-center">
-          <h1 className="text-6xl font-bold dark:text-purple-500">
-            Help the cook 🧑‍🍳
+        <section className="min-h-[65vh] flex flex-col justify-center e">
+          <h1 className="text-6xl font-bold text-slate-700 dark:text-white">
+            Help the <span className="text-purple-500">cook</span> 🧑‍🍳
           </h1>
 
-          <p className="mt-3 text-2xl dark:text-slate-100">
+          <p className="mt-3 text-2xl font-light dark:text-slate-100 font-lato">
             Don&apos;t know what to cook today? Just list the ingredients in
             your fridge and let the AI help you choose
           </p>
@@ -122,7 +211,7 @@ const Home: NextPage = () => {
                 </fieldset>
               </div>
               <button
-                className="flex items-center self-start gap-3 p-5 transition-opacity bg-purple-600 bg-opacity-30 border border-purple-500 rounded-lg group hover:bg-opacity-50"
+                className="flex items-center self-start gap-3 p-5 transition-opacity bg-purple-600 border border-purple-500 rounded-lg bg-opacity-30 group hover:bg-opacity-50"
                 onClick={() =>
                   append({
                     value:
@@ -143,7 +232,7 @@ const Home: NextPage = () => {
             </div>
 
             <button
-              className="px-5 py-3 font-bold text-green-100 bg-green-700 border border-green-500 bg-opacity-30 hover:bg-opacity-50 transition-opacity rounded-lg disabled:bg-gray-700 disabled:text-white disabled:border-gray-400 block mx-auto"
+              className="block px-5 py-3 mx-auto font-bold text-green-100 transition-opacity bg-green-700 border border-green-500 rounded-lg bg-opacity-30 hover:bg-opacity-50 disabled:bg-gray-700 disabled:text-white disabled:border-gray-400"
               type="submit"
               disabled={
                 !isValid ||
@@ -156,9 +245,10 @@ const Home: NextPage = () => {
             </button>
           </form>
         </section>
-        <div className="flex flex-wrap items-center justify-around max-w-4xl mt-6 sm:w-full">
-          <Transition show={recipeMutation.isSuccess}>
+        <div className="flex flex-wrap items-center max-w-4xl mt-6 sm:w-full">
+          <Transition show={!!text} className="max-w-prose">
             <Transition.Child
+              className="flex flex-row-reverse items-center w-full gap-4 mb-20"
               enter="transition-opacity ease-linear duration-300"
               enterFrom="opacity-0"
               enterTo="opacity-100"
@@ -166,25 +256,31 @@ const Home: NextPage = () => {
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <hr className="mb-20 border-none h-0.5 dark:bg-slate-100 rounded-md" />
+              <button
+                onClick={() => {
+                  setText("");
+                }}
+                className="flex items-center px-4 py-1 mx-auto text-red-300 transition-opacity bg-red-600 border border-red-400 rounded-full hover:gap-2 group w-fit bg-opacity-30 hover:bg-opacity-70 flex-nowrap"
+              >
+                <span className="w-0 opacity-0 overflow-hidden transition-all group-hover:w-[50px] group-hover:opacity-100">
+                  Clear
+                </span>{" "}
+                <Cross className="w-3 h-3" />
+              </button>
+              <hr className="border-none h-0.5 dark:bg-slate-100 rounded-md w-full" />
             </Transition.Child>
             <Transition.Child
+              className="w-full"
               enter="transition ease-in-out duration-300 transform"
               enterFrom="scale-0 opacity-0"
               enterTo="scale-100 opacity-100"
               leave="transition ease-in-out duration-300 transform"
-              leaveFrom="translate-y-0 scale-100"
-              leaveTo="-translate-y-full scale-0"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-0"
             >
-              <ReactMarkdown className="prose xl:prose-xl dark:prose-headings:text-purple-500 dark:prose-p:text-slate-200 dark:prose-li:text-slate-300 mb-12">
-                {recipeMutation.data ?? ""}
+              <ReactMarkdown className="w-full mb-12 prose xl:prose-xl dark:prose-headings:text-purple-500 dark:prose-p:text-slate-200 dark:prose-li:text-slate-300 dark:prose-strong:text-purple-500">
+                {text ?? ""}
               </ReactMarkdown>
-              <button
-                onClick={recipeMutation.reset}
-                className="w-fit px-4 py-1 bg-red-600 bg-opacity-30 text-red-300 hover:bg-opacity-70 border border-red-400 rounded-full transition-opacity mx-auto flex flex-nowrap items-center gap-2"
-              >
-                Clear <Cross className="h-3 w-3" />
-              </button>
             </Transition.Child>
           </Transition>
         </div>

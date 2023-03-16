@@ -1,5 +1,6 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import { Configuration, OpenAIApi } from "openai";
+import { NextRequest, NextResponse } from "next/server";
+import { OpenAI } from "openai-streams";
+import { OpenAIStream } from "@/lib/OpenAiStream";
 
 const systemConfig = `You are an experienced chef that wants to help people easily cook from their homes. You explain recipes with ease and without complicating them much so anyone can cook. You always format your recipes using Markdown so the users can read them easily.`;
 
@@ -10,28 +11,20 @@ Currently, I have:
 ${listedItems}
 What can I make?`;
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextRequest) {
   try {
-    const token = req.cookies.OPENAPI_TOKEN;
+    const token = req.cookies.get("OPENAPI_TOKEN")?.value;
 
-    const items = req.body.items as string[];
+    const body = await req.json();
+
+    const items = body.items as string[];
 
     const formattedItems = items.map((i) => `- ${i}`).join("\r\n");
 
     if (!token) {
-      res.status(404);
-      res.end();
+      return new Response("No token was provided", { status: 400 });
     } else {
-      const config = new Configuration({
-        apiKey: token,
-      });
-
-      const openAI = new OpenAIApi(config);
-
-      const response = await openAI.createChatCompletion({
+      const stream = await OpenAIStream(token, {
         model: "gpt-3.5-turbo",
         messages: [
           {
@@ -43,13 +36,18 @@ export default async function handler(
             content: systemConfig,
           },
         ],
-        max_tokens: 500,
         temperature: 0.6,
+        stream: true,
       });
-      return res.send(response.data.choices[0]?.message?.content);
+
+      return new Response(stream);
     }
   } catch (err: any) {
     console.log({ err });
-    return res.status(500).send(err);
+    return new Response(err, { status: 500 });
   }
 }
+
+export const config = {
+  runtime: "edge",
+};

@@ -19,6 +19,7 @@
     "eventsource-parser": "^0.1.0",
     "next": "^13.2.4",
     "openai": "^3.2.1",
+    "openai-streams": "^4.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.43.5",
@@ -39,6 +40,7 @@
     "postcss": "^8.4.18",
     "tailwind-scrollbar": "^3.0.0",
     "tailwindcss": "^3.2.4",
+    "tailwindcss-animate": "^1.0.5",
     "typescript": "4.9.4"
   }
 }
