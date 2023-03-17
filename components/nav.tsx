@@ -59,7 +59,14 @@ export default function Nav() {
     },
   });
 
+  const [mounted, setMounted] = React.useState(false);
   const { theme, setTheme } = useTheme();
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      setMounted(true);
+    }
+  }, []);
 
   const onSubmit = (data: FormState) => {
     tokenMutation.mutate(data?.token ?? "");
@@ -78,10 +85,16 @@ export default function Nav() {
           }
         )}
       >
-        {theme === "light" ? (
-          <Sun className="w-5 h-5" />
+        {mounted ? (
+          <>
+            {theme === "light" ? (
+              <Sun className="w-5 h-5" />
+            ) : (
+              <Moon className="w-5 h-5" />
+            )}
+          </>
         ) : (
-          <Moon className="w-5 h-5" />
+          <span className="block w-5 h-5" />
         )}
       </button>
 
