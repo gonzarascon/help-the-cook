@@ -11,6 +11,7 @@ import ReactMarkdown from "react-markdown";
 import { Transition } from "@headlessui/react";
 import Cross from "@/public/icons/close-outline.svg";
 import { useState } from "react";
+import useLocalStorage from "@/hooks/useLocalStorage";
 
 const schema = z.object({
   ingredients: z.array(z.object({ value: z.string().min(3) })),
@@ -34,6 +35,8 @@ type FormState = {
 };
 
 const Home: NextPage = () => {
+  const [tokenSaved] = useLocalStorage("token_saved", false);
+
   const [text, setText] = useState("");
   const {
     control,
@@ -88,13 +91,13 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="w-full min-h-screen px-20 bg-top bg-cover py-28 bg-mesh-light dark:bg-mesh-dark">
-        <section className="min-h-[65vh] flex flex-col justify-center e">
-          <h1 className="text-6xl font-bold text-slate-700 dark:text-white">
+      <main className="w-full min-h-screen px-5 bg-top bg-cover lg:px-20 py-28 bg-mesh-light dark:bg-mesh-dark">
+        <section className="min-h-[65vh] flex flex-col justify-center max-w-5xl mx-auto">
+          <h1 className="text-5xl font-bold lg:text-6xl text-slate-700 dark:text-white">
             Help the <span className="text-purple-500">cook</span> 🧑‍🍳
           </h1>
 
-          <p className="mt-3 text-2xl font-light dark:text-slate-100 font-lato">
+          <p className="mt-3 text-xl font-light lg:text-2xl dark:text-slate-100 font-lato">
             Don&apos;t know what to cook today? Just list the ingredients in
             your fridge and let the AI help you choose
           </p>
@@ -103,26 +106,29 @@ const Home: NextPage = () => {
             className="w-full mt-8 mb-6 space-y-10"
             onSubmit={handleSubmit(generateRecipe)}
           >
-            <div className="flex items-center justify-center w-full gap-5 p-4 bg-white shadow-md rounded-xl dark:bg-transparent dark:shadow-none flex-nowrap">
+            <div className="flex flex-col items-center justify-center w-full gap-5 p-4 bg-white shadow-md lg:flex-row rounded-xl dark:bg-transparent dark:shadow-none flex-nowrap">
               <div
                 className={cn(
-                  "overflow-auto max-w-[calc((245px*3))] scrollbar pb-2 border-r border-transparent transition-colors hidden",
+                  "lg:overflow-auto max-w-[calc((245px*3))] scrollbar pb-2 lg:border-r border-transparent transition-colors hidden",
                   {
                     "w-full border-purple-700 dark:border-slate-700 block":
                       fields.length !== 0,
                   }
                 )}
               >
-                <fieldset className="flex items-center gap-4 mx-auto">
+                <fieldset className="flex flex-col items-center gap-4 mx-auto lg:flex-row">
                   {fields.map((field, index) => (
-                    <div className="relative p-2 group" key={field.id}>
+                    <div
+                      className="relative w-full p-2 group lg:w-auto"
+                      key={field.id}
+                    >
                       <Input
                         {...register(`ingredients.${index}.value`)}
                         className="min-w-[200px]"
                       />
                       <button
                         type="button"
-                        className="absolute top-0 right-0 transition-opacity opacity-0 group-hover:opacity-100"
+                        className="absolute top-0 right-0 transition-opacity opacity-100 lg:opacity-0 group-hover:opacity-100"
                         onClick={() => remove(index)}
                       >
                         <PlusCircleSolid className="w-5 h-5 text-red-500 rotate-45 hover:text-red-400" />
@@ -132,7 +138,7 @@ const Home: NextPage = () => {
                 </fieldset>
               </div>
               <button
-                className="flex items-center self-start gap-3 p-5 transition-colors border border-purple-500 rounded-lg dark:transition-opacity hover:bg-purple-100 dark:bg-purple-600 dark:bg-opacity-30 group dark:hover:bg-opacity-50"
+                className="flex items-center gap-3 p-5 transition-colors border border-purple-500 rounded-lg lg:self-start dark:transition-opacity hover:bg-purple-100 dark:bg-purple-600 dark:bg-opacity-30 group dark:hover:bg-opacity-50"
                 onClick={() =>
                   append({
                     value:
@@ -159,17 +165,21 @@ const Home: NextPage = () => {
                 !isValid ||
                 isSubmitting ||
                 recipeMutation.isLoading ||
-                fields.length === 0
+                fields.length === 0 ||
+                !tokenSaved
               }
             >
               Let&apos;s get cooking!
             </button>
           </form>
         </section>
-        <div className="flex flex-wrap items-center max-w-4xl mt-6 sm:w-full">
-          <Transition show={!!text} className="max-w-prose">
+        <div className="flex flex-wrap justify-center max-w-4xl mx-auto mt-6 sm:w-full">
+          <Transition
+            show={!!text && !recipeMutation.isError}
+            className="max-w-prose"
+          >
             <Transition.Child
-              className="flex flex-row-reverse items-center w-full gap-4 mb-20"
+              className="flex items-center w-full mb-10 lg:mb-20 lg:flex-row-reverse"
               enter="transition-opacity ease-linear duration-300"
               enterFrom="opacity-0"
               enterTo="opacity-100"
@@ -177,17 +187,6 @@ const Home: NextPage = () => {
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <button
-                onClick={() => {
-                  setText("");
-                }}
-                className="flex items-center px-4 py-1 mx-auto text-sm text-white transition-opacity border border-red-400 rounded-full bg-rose-600 dark:bg-red-600 dark:text-red-300 hover:gap-2 group w-fit dark:bg-opacity-30 dark:hover:bg-opacity-70 flex-nowrap"
-              >
-                <span className="w-0 opacity-0 overflow-hidden transition-all group-hover:w-[50px] group-hover:opacity-100">
-                  Clear
-                </span>{" "}
-                <Cross className="w-3 h-3" />
-              </button>
               <hr className="border-none h-0.5 bg-slate-300 dark:bg-slate-100 rounded-md w-full" />
             </Transition.Child>
             <Transition.Child
@@ -199,9 +198,20 @@ const Home: NextPage = () => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-0"
             >
-              <ReactMarkdown className="w-full px-6 mb-12 prose bg-white shadow-md dark:bg-transparent dark:shadow-none py-7 rounded-xl xl:prose-xl prose-headings:text-purple-500 dark:prose-p:text-slate-200 dark:prose-li:text-slate-300 dark:prose-strong:text-purple-500">
+              <ReactMarkdown className="w-full px-6 mb-12 prose-sm prose bg-white shadow-md md:prose-lg dark:bg-transparent dark:shadow-none py-7 rounded-xl prose-headings:text-purple-500 dark:prose-p:text-slate-200 dark:prose-li:text-slate-300 dark:prose-strong:text-purple-500">
                 {text ?? ""}
               </ReactMarkdown>
+              <button
+                onClick={() => {
+                  setText("");
+                }}
+                className="flex items-center gap-2 px-4 py-1 mx-auto text-sm text-white transition-opacity border border-red-400 rounded-full lg:gap-0 bg-rose-600 dark:bg-red-600 dark:text-red-300 hover:gap-2 group w-fit dark:bg-opacity-30 dark:hover:bg-opacity-70 flex-nowrap"
+              >
+                <span className="w-auto lg:w-0 lg:opacity-0 overflow-hidden transition-all group-hover:w-[50px] group-hover:opacity-100">
+                  Clear
+                </span>{" "}
+                <Cross className="w-3 h-3" />
+              </button>
             </Transition.Child>
           </Transition>
         </div>

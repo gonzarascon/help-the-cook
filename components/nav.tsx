@@ -18,11 +18,33 @@ import { Input } from "./ui/input";
 import { useTheme } from "next-themes";
 import Sun from "@/public/icons/sun-outline.svg";
 import Moon from "@/public/icons/moon-outline.svg";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
+const schema = z.object({
+  token: z
+    .string({
+      invalid_type_error: "Please enter an OpenAI token",
+      required_error: "This field is required",
+    })
+    .min(3, "Please enter an OpenAI token"),
+});
+
+type FormState = {
+  token: string;
+};
 
 export default function Nav() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormState>({
+    resolver: zodResolver(schema),
+  });
   const [tokenSaved, setTokenSaved] = useLocalStorage("token_saved", false);
   const [open, setOpen] = React.useState(false);
-  const [token, setToken] = React.useState<string | null>(null);
   const tokenMutation = useMutation({
     mutationFn: (token: string) =>
       fetch("/api/openai/setToken", {
@@ -34,8 +56,15 @@ export default function Nav() {
 
   const { theme, setTheme } = useTheme();
 
+  const onSubmit = (data: FormState) => {
+    tokenMutation.mutate(data?.token ?? "");
+    setOpen(false);
+  };
+
+  console.log(errors);
+
   return (
-    <header className="absolute top-0 flex items-center justify-between w-full px-20 py-5">
+    <header className="absolute top-0 flex items-center justify-between w-full px-5 py-5 lg:px-20">
       <button
         onClick={() => setTheme(theme === "light" ? "dark" : "light")}
         className="p-3 transition-colors rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700"
@@ -76,30 +105,21 @@ export default function Nav() {
               browser.
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4">
+          <form className="py-4" onSubmit={handleSubmit(onSubmit)}>
             <Label
               htmlFor="token"
               className="text-right dark:text-white font-lato"
             >
               Your Open AI Token
             </Label>
-            <Input
-              id="token"
-              onChange={(e) => setToken(e.target.value)}
-              className="col-span-3"
-            />
-          </div>
-          <DialogFooter>
-            <Button
-              type="submit"
-              onClick={() => {
-                tokenMutation.mutate(token ?? "");
-                setOpen(false);
-              }}
-            >
+            <Input id="token" {...register("token")} className="col-span-3" />
+            <span className="block mt-2 min-h-[20px] text-sm font-light text-rose-600">
+              {errors.token?.message}
+            </span>
+            <Button type="submit" className="block mt-5 ml-auto">
               Save changes
             </Button>
-          </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </header>
