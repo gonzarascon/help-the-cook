@@ -28,7 +28,9 @@ const schema = z.object({
       invalid_type_error: "Please enter an OpenAI token",
       required_error: "This field is required",
     })
-    .min(3, "Please enter an OpenAI token"),
+    .regex(/^sk-[A-Za-z0-9-_]{48}$/, "Please enter an OpenAI token")
+    .min(51, "Please enter an OpenAI token")
+    .max(51, "Please enter an OpenAI token"),
 });
 
 type FormState = {
@@ -52,6 +54,9 @@ export default function Nav() {
         body: JSON.stringify({ token }),
         headers: { "Content-Type": "application/json" },
       }),
+    onSuccess: () => {
+      setTokenSaved(true);
+    },
   });
 
   const { theme, setTheme } = useTheme();
@@ -60,8 +65,6 @@ export default function Nav() {
     tokenMutation.mutate(data?.token ?? "");
     setOpen(false);
   };
-
-  console.log(errors);
 
   return (
     <header className="absolute top-0 flex items-center justify-between w-full px-5 py-5 lg:px-20">
@@ -76,15 +79,7 @@ export default function Nav() {
         )}
       </button>
 
-      <Dialog
-        open={open}
-        onOpenChange={(open) => {
-          setOpen(open);
-          if (!tokenSaved) {
-            setTokenSaved(true);
-          }
-        }}
-      >
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button
             variant="outline"

@@ -125,6 +125,13 @@ const Home: NextPage = () => {
                       <Input
                         {...register(`ingredients.${index}.value`)}
                         className="min-w-[200px]"
+                        placeholder={
+                          ingredientPlaceholders[
+                            Math.floor(
+                              Math.random() * ingredientPlaceholders.length
+                            )
+                          ]
+                        }
                       />
                       <button
                         type="button"
@@ -141,12 +148,7 @@ const Home: NextPage = () => {
                 className="flex items-center gap-3 p-5 transition-colors border border-purple-500 rounded-lg lg:self-start dark:transition-opacity hover:bg-purple-100 dark:bg-purple-600 dark:bg-opacity-30 group dark:hover:bg-opacity-50"
                 onClick={() =>
                   append({
-                    value:
-                      ingredientPlaceholders[
-                        Math.floor(
-                          Math.random() * ingredientPlaceholders.length
-                        )
-                      ],
+                    value: "",
                   })
                 }
                 type="button"
