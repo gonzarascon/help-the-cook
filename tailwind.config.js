@@ -3,6 +3,7 @@ const colors = require("tailwindcss/colors");
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: ["class"],
   content: [
     "./pages/**/*.{js,ts,jsx,tsx}",
     "./components/**/*.{js,ts,jsx,tsx}",
@@ -15,7 +16,8 @@ module.exports = {
         lato: ["var(--font-lato)", ...fontFamily.sans],
       },
       backgroundImage: {
-        "mesh-orange-purple": "url('/mesh.svg')",
+        "mesh-dark": "url('/mesh.svg')",
+        "mesh-light": "url('/mesh-light.svg')",
       },
       keyframes: {
         ring: {

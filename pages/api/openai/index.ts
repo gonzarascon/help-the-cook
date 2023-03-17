@@ -6,7 +6,7 @@ const systemConfig = `You are an experienced chef that wants to help people easi
 
 const prompt = (
   listedItems: string
-) => `I want to cook something with the ingredients in my house but I have no ideas. Based on the following ingredients and quantities, write a recipe for me to do, it does not necessarily need to include all of the ingredients listed but you can't add ingredients that I haven't listed.
+) => `I want to cook something with the ingredients in my house but I don't come up with any ideas. Based on the following ingredients and quantities, write a recipe for me to do, it does not necessarily need to include all of the ingredients listed and you can't add ingredients that I haven't listed to you.
 Currently, I have:
 ${listedItems}
 What can I make?`;
@@ -36,7 +36,7 @@ export default async function handler(req: NextRequest) {
             content: systemConfig,
           },
         ],
-        temperature: 0.6,
+        temperature: 0.4,
         stream: true,
       });
 

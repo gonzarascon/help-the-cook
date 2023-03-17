@@ -10,19 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import ReactMarkdown from "react-markdown";
 import { Transition } from "@headlessui/react";
 import Cross from "@/public/icons/close-outline.svg";
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import useLocalStorage from "@/hooks/useLocalStorage";
+import { useState } from "react";
 
 const schema = z.object({
   ingredients: z.array(z.object({ value: z.string().min(3) })),
@@ -42,35 +30,22 @@ const ingredientPlaceholders: string[] = [
 ];
 
 type FormState = {
-  token: string;
   ingredients: { value: string }[];
 };
 
 const Home: NextPage = () => {
-  const [tokenSaved, setTokenSaved] = useLocalStorage("token_saved", false);
-  const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
   const {
     control,
     register,
     handleSubmit,
     formState: { isValid, isSubmitting },
-    getValues,
   } = useForm<FormState>({
     resolver: zodResolver(schema),
   });
   const { fields, append, remove } = useFieldArray({
     control,
     name: "ingredients",
-  });
-
-  const tokenMutation = useMutation({
-    mutationFn: (token: string) =>
-      fetch("/api/openai/setToken", {
-        method: "POST",
-        body: JSON.stringify({ token }),
-        headers: { "Content-Type": "application/json" },
-      }),
   });
 
   const recipeMutation = useMutation({
@@ -113,64 +88,7 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="w-full min-h-screen px-20 bg-top bg-cover py-28 bg-mesh-orange-purple">
-        <div className="absolute top-5 right-5">
-          <Dialog
-            open={open}
-            onOpenChange={(open) => {
-              setOpen(open);
-              if (!tokenSaved) {
-                setTokenSaved(true);
-              }
-            }}
-          >
-            <DialogTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn({
-                  "animate-ring ease-in-out direction-alternate delay-100":
-                    !tokenSaved,
-                })}
-              >
-                Add Open AI Token
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Add Open AI Token</DialogTitle>
-                <DialogDescription className="font-lato">
-                  In order to this app to work, you should set your Open AI
-                  Token. Don&apos;t worry, we will never store it anywhere else
-                  than your browser.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="py-4">
-                <Label
-                  htmlFor="token"
-                  className="text-right dark:text-white font-lato"
-                >
-                  Your Open AI Token
-                </Label>
-                <Input
-                  id="token"
-                  {...register("token")}
-                  className="col-span-3"
-                />
-              </div>
-              <DialogFooter>
-                <Button
-                  type="submit"
-                  onClick={() => {
-                    tokenMutation.mutate(getValues("token"));
-                    setOpen(false);
-                  }}
-                >
-                  Save changes
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
+      <main className="w-full min-h-screen px-20 bg-top bg-cover py-28 bg-mesh-light dark:bg-mesh-dark">
         <section className="min-h-[65vh] flex flex-col justify-center e">
           <h1 className="text-6xl font-bold text-slate-700 dark:text-white">
             Help the <span className="text-purple-500">cook</span> 🧑‍🍳
@@ -185,11 +103,14 @@ const Home: NextPage = () => {
             className="w-full mt-8 mb-6 space-y-10"
             onSubmit={handleSubmit(generateRecipe)}
           >
-            <div className="flex items-center justify-center w-full gap-5 flex-nowrap">
+            <div className="flex items-center justify-center w-full gap-5 p-4 bg-white shadow-md rounded-xl dark:bg-transparent dark:shadow-none flex-nowrap">
               <div
                 className={cn(
                   "overflow-auto max-w-[calc((245px*3))] scrollbar pb-2 border-r border-transparent transition-colors hidden",
-                  { "w-full border-slate-700 block": fields.length !== 0 }
+                  {
+                    "w-full border-purple-700 dark:border-slate-700 block":
+                      fields.length !== 0,
+                  }
                 )}
               >
                 <fieldset className="flex items-center gap-4 mx-auto">
@@ -211,7 +132,7 @@ const Home: NextPage = () => {
                 </fieldset>
               </div>
               <button
-                className="flex items-center self-start gap-3 p-5 transition-opacity bg-purple-600 border border-purple-500 rounded-lg bg-opacity-30 group hover:bg-opacity-50"
+                className="flex items-center self-start gap-3 p-5 transition-colors border border-purple-500 rounded-lg dark:transition-opacity hover:bg-purple-100 dark:bg-purple-600 dark:bg-opacity-30 group dark:hover:bg-opacity-50"
                 onClick={() =>
                   append({
                     value:
@@ -224,15 +145,15 @@ const Home: NextPage = () => {
                 }
                 type="button"
               >
-                <PlusCircleSolid className="w-6 h-6 text-purple-100" />
-                <span className="text-sm font-semibold text-purple-100">
+                <PlusCircleSolid className="w-6 h-6 text-purple-500 dark:text-purple-100" />
+                <span className="text-sm font-semibold text-purple-500 dark:text-purple-100 whitespace-nowrap">
                   Add ingredient
                 </span>
               </button>
             </div>
 
             <button
-              className="block px-5 py-3 mx-auto font-bold text-green-100 transition-opacity bg-green-700 border border-green-500 rounded-lg bg-opacity-30 hover:bg-opacity-50 disabled:bg-gray-700 disabled:text-white disabled:border-gray-400"
+              className="block px-5 py-3 mx-auto text-sm font-semibold text-white transition-colors border border-green-500 rounded-lg dark:transition-opacity bg-lime-500 hover:bg-lime-400 dark:text-green-100 dark:bg-green-700 dark:bg-opacity-30 dark:hover:bg-opacity-50 disabled:bg-slate-400 disabled:opacity-30 dark:disabled:bg-gray-700 disabled:text-white disabled:border-gray-400"
               type="submit"
               disabled={
                 !isValid ||
@@ -260,14 +181,14 @@ const Home: NextPage = () => {
                 onClick={() => {
                   setText("");
                 }}
-                className="flex items-center px-4 py-1 mx-auto text-red-300 transition-opacity bg-red-600 border border-red-400 rounded-full hover:gap-2 group w-fit bg-opacity-30 hover:bg-opacity-70 flex-nowrap"
+                className="flex items-center px-4 py-1 mx-auto text-sm text-white transition-opacity border border-red-400 rounded-full bg-rose-600 dark:bg-red-600 dark:text-red-300 hover:gap-2 group w-fit dark:bg-opacity-30 dark:hover:bg-opacity-70 flex-nowrap"
               >
                 <span className="w-0 opacity-0 overflow-hidden transition-all group-hover:w-[50px] group-hover:opacity-100">
                   Clear
                 </span>{" "}
                 <Cross className="w-3 h-3" />
               </button>
-              <hr className="border-none h-0.5 dark:bg-slate-100 rounded-md w-full" />
+              <hr className="border-none h-0.5 bg-slate-300 dark:bg-slate-100 rounded-md w-full" />
             </Transition.Child>
             <Transition.Child
               className="w-full"
@@ -278,7 +199,7 @@ const Home: NextPage = () => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-0"
             >
-              <ReactMarkdown className="w-full mb-12 prose xl:prose-xl dark:prose-headings:text-purple-500 dark:prose-p:text-slate-200 dark:prose-li:text-slate-300 dark:prose-strong:text-purple-500">
+              <ReactMarkdown className="w-full px-6 mb-12 prose bg-white shadow-md dark:bg-transparent dark:shadow-none py-7 rounded-xl xl:prose-xl prose-headings:text-purple-500 dark:prose-p:text-slate-200 dark:prose-li:text-slate-300 dark:prose-strong:text-purple-500">
                 {text ?? ""}
               </ReactMarkdown>
             </Transition.Child>
