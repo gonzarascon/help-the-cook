@@ -70,12 +70,18 @@ export default function Nav() {
     <header className="absolute top-0 flex items-center justify-between w-full px-5 py-5 lg:px-20">
       <button
         onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-        className="p-3 transition-colors rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700"
+        className={cn(
+          "p-3 transition-colors rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700",
+          {
+            "text-slate-700": theme === "light",
+            "text-slate-100": theme === "dark",
+          }
+        )}
       >
         {theme === "light" ? (
-          <Sun className="w-5 h-5 text-slate-700" />
+          <Sun className="w-5 h-5" />
         ) : (
-          <Moon className="w-5 h-5 text-slate-100" />
+          <Moon className="w-5 h-5" />
         )}
       </button>
 
