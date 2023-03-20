@@ -111,7 +111,7 @@ export default function Nav() {
           rel="noopener noreferrer"
           target="_blank"
         >
-          <GithubSolid className="fill-slate-400 dark:fill-slate-200 opacity-75 h-6 w-6" />
+          <GithubSolid className="w-6 h-6 opacity-75 fill-slate-400 dark:fill-slate-200" />
         </a>
         <a
           className="p-3 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700"
@@ -119,9 +119,20 @@ export default function Nav() {
           rel="noopener noreferrer"
           target="_blank"
         >
-          <TwitterSolid className="fill-slate-400 dark:fill-slate-200 opacity-75 h-5 w-5" />
+          <TwitterSolid className="w-5 h-5 opacity-75 fill-slate-400 dark:fill-slate-200" />
         </a>
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog
+          open={open}
+          onOpenChange={(open) => {
+            setOpen(open);
+            event({
+              action: "toggle_api_modal",
+              category: "user_interaction",
+              label: "User toggles the set api modal",
+              value: open,
+            });
+          }}
+        >
           <DialogTrigger asChild>
             <Button
               variant="outline"
