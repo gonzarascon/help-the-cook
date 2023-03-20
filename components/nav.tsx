@@ -22,6 +22,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import TwitterSolid from "@/public/icons/twitter-solid.svg";
 import GithubSolid from "@/public/icons/github-solid.svg";
+import { event } from "@/lib/ga";
 
 const schema = z.object({
   token: z
@@ -70,6 +71,11 @@ export default function Nav() {
   }, []);
 
   const onSubmit = (data: FormState) => {
+    event({
+      action: "set_api_key",
+      category: "user_interaction",
+      label: "User sets OpenAI API key",
+    });
     tokenMutation.mutate(data?.token ?? "");
     setOpen(false);
   };
