@@ -12,6 +12,7 @@ import { Transition } from "@headlessui/react";
 import Cross from "@/public/icons/close-outline.svg";
 import { useState } from "react";
 import useLocalStorage from "@/hooks/useLocalStorage";
+import { event } from "@/lib/ga";
 
 const schema = z.object({
   ingredients: z.array(z.object({ value: z.string().min(3) })),
@@ -79,6 +80,11 @@ const Home: NextPage = () => {
   });
 
   const generateRecipe = (data: FormState) => {
+    event({
+      action: "submit_form",
+      category: "user_interaction",
+      label: "Submit form",
+    });
     recipeMutation.mutate(
       data.ingredients.map((ingredient) => ingredient.value)
     );
@@ -216,6 +222,11 @@ const Home: NextPage = () => {
               </ReactMarkdown>
               <button
                 onClick={() => {
+                  event({
+                    action: "clear_text",
+                    category: "user_interaction",
+                    label: "Clear recipe text",
+                  });
                   setText("");
                 }}
                 className="flex items-center gap-2 px-4 py-1 mx-auto text-sm text-white transition-opacity border border-red-400 rounded-full lg:gap-0 bg-rose-600 dark:bg-red-600 dark:text-red-300 hover:gap-2 group w-fit dark:bg-opacity-30 dark:hover:bg-opacity-70 flex-nowrap"
