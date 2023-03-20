@@ -108,9 +108,9 @@ const Home: NextPage = () => {
             Help the <span className="text-purple-500">cook</span> 🧑‍🍳
           </h1>
 
-          <p className="mt-3 text-xl font-light lg:text-2xl dark:text-slate-100 font-lato">
-            Don&apos;t know what to cook today? Just list the ingredients in
-            your fridge and let the AI help you choose
+          <p className="max-w-xl mt-3 text-xl font-light lg:text-2xl dark:text-slate-100 font-lato">
+            Don&apos;t know what to cook today? Just list the ingredients you
+            have at home and let the AI help you choose.
           </p>
 
           <form

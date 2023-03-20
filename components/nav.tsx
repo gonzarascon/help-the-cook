@@ -107,15 +107,23 @@ export default function Nav() {
                 !tokenSaved,
             })}
           >
-            Add Open AI Token
+            Add Open AI API Key
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Add Open AI Token</DialogTitle>
             <DialogDescription className="font-lato">
-              In order to this app to work, you should set your Open AI Token.
-              Don&apos;t worry, we will never store it anywhere else than your
+              In order to this app to work, you should set{" "}
+              <a
+                className="text-purple-500 underline"
+                href="https://help.openai.com/en/articles/4936850-where-do-i-find-my-secret-api-key"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                your Open AI API Key
+              </a>
+              . Don&apos;t worry, we will never store it anywhere else than your
               browser.
             </DialogDescription>
           </DialogHeader>
@@ -124,7 +132,7 @@ export default function Nav() {
               htmlFor="token"
               className="text-right dark:text-white font-lato"
             >
-              Your Open AI Token
+              Your Open AI API Key
             </Label>
             <Input id="token" {...register("token")} className="col-span-3" />
             <span className="block mt-2 min-h-[20px] text-sm font-light text-rose-600">
