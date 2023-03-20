@@ -89,6 +89,17 @@ const Home: NextPage = () => {
       <Head>
         <title>Help the cook!</title>
         <link rel="icon" href="/favicon.ico" />
+        <meta name="og:title" content="Help the cook! 🧑‍🍳" />
+        <meta
+          name="og:description"
+          content="AI to the rescue of cooking aficionados"
+        />
+        <meta
+          name="og:image"
+          content={`${
+            process.env.VERCEL_URL ? "https://" + process.env.VERCEL_URL : ""
+          }/og-image.png`}
+        />
       </Head>
 
       <main className="w-full min-h-screen px-5 bg-top bg-cover lg:px-20 py-28 bg-mesh-light dark:bg-mesh-dark">
