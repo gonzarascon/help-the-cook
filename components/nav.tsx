@@ -5,7 +5,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -21,6 +20,8 @@ import Moon from "@/public/icons/moon-outline.svg";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import TwitterSolid from "@/public/icons/twitter-solid.svg";
+import GithubSolid from "@/public/icons/github-solid.svg";
 
 const schema = z.object({
   token: z
@@ -97,53 +98,68 @@ export default function Nav() {
           <span className="block w-5 h-5" />
         )}
       </button>
-
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button
-            variant="outline"
-            className={cn({
-              "animate-ring ease-in-out direction-alternate delay-100 justify-self-end":
-                !tokenSaved,
-            })}
-          >
-            Add Open AI API Key
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Add Open AI Token</DialogTitle>
-            <DialogDescription className="font-lato">
-              In order to this app to work, you should set{" "}
-              <a
-                className="text-purple-500 underline"
-                href="https://help.openai.com/en/articles/4936850-where-do-i-find-my-secret-api-key"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                your Open AI API Key
-              </a>
-              . Don&apos;t worry, we will never store it anywhere else than your
-              browser.
-            </DialogDescription>
-          </DialogHeader>
-          <form className="py-4" onSubmit={handleSubmit(onSubmit)}>
-            <Label
-              htmlFor="token"
-              className="text-right dark:text-white font-lato"
+      <div className="flex items-center gap-4 ">
+        <a
+          className="p-3 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700"
+          href="https://github.com/gonzarascon/help-the-cook"
+          rel="noopener noreferrer"
+        >
+          <GithubSolid className="fill-slate-400 dark:fill-slate-200 opacity-75 h-6 w-6" />
+        </a>
+        <a
+          className="p-3 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700"
+          href="https://twitter.com/Gonza_Rascon"
+          rel="noopener noreferrer"
+        >
+          <TwitterSolid className="fill-slate-400 dark:fill-slate-200 opacity-75 h-5 w-5" />
+        </a>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn({
+                "animate-ring ease-in-out direction-alternate delay-100 justify-self-end":
+                  !tokenSaved,
+              })}
             >
-              Your Open AI API Key
-            </Label>
-            <Input id="token" {...register("token")} className="col-span-3" />
-            <span className="block mt-2 min-h-[20px] text-sm font-light text-rose-600">
-              {errors.token?.message}
-            </span>
-            <Button type="submit" className="block mt-5 ml-auto">
-              Save changes
+              Add Open AI API Key
             </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Add Open AI Token</DialogTitle>
+              <DialogDescription className="font-lato">
+                In order to this app to work, you should set{" "}
+                <a
+                  className="text-purple-500 underline"
+                  href="https://help.openai.com/en/articles/4936850-where-do-i-find-my-secret-api-key"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  your Open AI API Key
+                </a>
+                . Don&apos;t worry, we will never store it anywhere else than
+                your browser.
+              </DialogDescription>
+            </DialogHeader>
+            <form className="py-4" onSubmit={handleSubmit(onSubmit)}>
+              <Label
+                htmlFor="token"
+                className="text-right dark:text-white font-lato"
+              >
+                Your Open AI API Key
+              </Label>
+              <Input id="token" {...register("token")} className="col-span-3" />
+              <span className="block mt-2 min-h-[20px] text-sm font-light text-rose-600">
+                {errors.token?.message}
+              </span>
+              <Button type="submit" className="block mt-5 ml-auto">
+                Save changes
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
     </header>
   );
 }
