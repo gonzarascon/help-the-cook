@@ -2,10 +2,9 @@ type GTagEvent = {
   action: string;
   category: string;
   label: string;
-  value?: number;
+  value?: any;
 };
 
-// https://developers.google.com/analytics/devguides/collection/gtagjs/events
 export const event = ({ action, category, label, value }: GTagEvent): void => {
   if (typeof window !== "undefined") {
     window.gtag("event", action, {
