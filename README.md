@@ -15,4 +15,11 @@
    npm run dev
    ```
 
-#### Contributions open!
+### Special thanks
+
+- To [@shadcn](https://github.com/shadcn) for the amazing [UI kit](https://ui.shadcn.com/)
+
+<br/>
+<br/>
+
+### Contributions open!
