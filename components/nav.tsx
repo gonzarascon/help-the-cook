@@ -103,6 +103,7 @@ export default function Nav() {
           className="p-3 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700"
           href="https://github.com/gonzarascon/help-the-cook"
           rel="noopener noreferrer"
+          target="_blank"
         >
           <GithubSolid className="fill-slate-400 dark:fill-slate-200 opacity-75 h-6 w-6" />
         </a>
@@ -110,6 +111,7 @@ export default function Nav() {
           className="p-3 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700"
           href="https://twitter.com/Gonza_Rascon"
           rel="noopener noreferrer"
+          target="_blank"
         >
           <TwitterSolid className="fill-slate-400 dark:fill-slate-200 opacity-75 h-5 w-5" />
         </a>
