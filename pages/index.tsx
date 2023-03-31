@@ -85,6 +85,7 @@ const Home: NextPage = () => {
       category: "user_interaction",
       label: "Submit form",
     });
+    setText("");
     recipeMutation.mutate(
       data.ingredients.map((ingredient) => ingredient.value)
     );
