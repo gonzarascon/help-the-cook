@@ -8,11 +8,11 @@ import { useMutation } from "@tanstack/react-query";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ReactMarkdown from "react-markdown";
-import { Transition } from "@headlessui/react";
 import Cross from "@/public/icons/close-outline.svg";
 import { useState } from "react";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { event } from "@/lib/ga";
+import { AnimatePresence, motion } from "framer-motion";
 
 const schema = z.object({
   ingredients: z.array(z.object({ value: z.string().min(3) })),
@@ -72,6 +72,11 @@ const Home: NextPage = () => {
             done = doneReading;
             const chunkValue = decoder.decode(value);
 
+            if (!text) {
+              const body = document.getElementsByTagName("body")[0];
+              body.style.overflow = "hidden";
+            }
+
             setText((prev) => prev + chunkValue);
           }
         }
@@ -109,7 +114,7 @@ const Home: NextPage = () => {
         />
       </Head>
 
-      <main className="w-full min-h-screen px-5 bg-top bg-cover lg:px-20 py-28 bg-mesh-light dark:bg-mesh-dark">
+      <main className="relative w-full min-h-screen px-5 overflow-auto bg-top bg-cover md:overflow-hidden lg:px-20 py-28 bg-mesh-light dark:bg-mesh-dark">
         <section className="min-h-[65vh] flex flex-col justify-center max-w-5xl mx-auto">
           <h1 className="text-5xl font-bold lg:text-6xl text-slate-700 dark:text-white">
             Help the <span className="text-purple-500">cook</span> 🧑‍🍳
@@ -193,53 +198,65 @@ const Home: NextPage = () => {
             </button>
           </form>
         </section>
-        <div className="flex flex-wrap justify-center max-w-4xl mx-auto mt-6 sm:w-full">
-          <Transition
-            show={!!text && !recipeMutation.isError}
-            className="max-w-prose"
-          >
-            <Transition.Child
-              className="flex items-center w-full mb-10 lg:mb-20 lg:flex-row-reverse"
-              enter="transition-opacity ease-linear duration-300"
-              enterFrom="opacity-0"
-              enterTo="opacity-100"
-              leave="transition-opacity ease-linear duration-300"
-              leaveFrom="opacity-100"
-              leaveTo="opacity-0"
-            >
-              <hr className="border-none h-0.5 bg-slate-300 dark:bg-slate-100 rounded-md w-full" />
-            </Transition.Child>
-            <Transition.Child
-              className="w-full"
-              enter="transition ease-in-out duration-300 transform"
-              enterFrom="scale-0 opacity-0"
-              enterTo="scale-100 opacity-100"
-              leave="transition ease-in-out duration-300 transform"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-0"
-            >
-              <ReactMarkdown className="w-full px-6 mb-12 prose-sm prose bg-white shadow-md md:prose-lg dark:bg-transparent dark:shadow-none py-7 rounded-xl prose-headings:text-purple-500 dark:prose-p:text-slate-200 dark:prose-li:text-slate-300 dark:prose-strong:text-purple-500">
-                {text ?? ""}
-              </ReactMarkdown>
-              <button
-                onClick={() => {
-                  event({
-                    action: "clear_text",
-                    category: "user_interaction",
-                    label: "Clear recipe text",
-                  });
-                  setText("");
+        <AnimatePresence>
+          {!!text && !recipeMutation.isError && (
+            <motion.div transition={{ delayChildren: 0.2 }}>
+              <motion.div
+                className="absolute inset-0 w-screen h-screen bg-black"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.3 }}
+                exit={{ opacity: 0 }}
+              ></motion.div>
+              <motion.div
+                variants={{
+                  show: {
+                    translateY: ["0%", "-50%", "-50%", "-95%"],
+                    transition: {
+                      duration: 1.5,
+                      ease: "easeInOut",
+                      times: [0, 0.25, 0.9, 1],
+                    },
+                  },
+                  hide: {
+                    translateY: ["-95%", "-100%", "-95%", "0%"],
+                    transition: {
+                      duration: 0.3,
+                      ease: "easeOut",
+                      times: [0, 0.2, 0.3, 1],
+                    },
+                  },
                 }}
-                className="flex items-center gap-2 px-4 py-1 mx-auto text-sm text-white transition-opacity border border-red-400 rounded-full lg:gap-0 bg-rose-600 dark:bg-red-600 dark:text-red-300 hover:gap-2 group w-fit dark:bg-opacity-30 dark:hover:bg-opacity-70 flex-nowrap"
+                animate="show"
+                exit="hide"
+                className="absolute h-full z-10 top-[calc(0px_+_114%)] md:top-[calc(0px_+_91%)] shadow-xl inset-x-0 mx-auto -bottom-full before:content-[''] before:-mb-1 before:block before:bg-[url('/triangle-bg.svg')] dark:before:bg-[url('/triangle-bg-dark.svg')] before:bg-repeat-x before:h-5 before:bg-[length:16px_19px] max-w-2xl"
               >
-                <span className="w-auto lg:w-0 lg:opacity-0 overflow-hidden transition-all group-hover:w-[50px] group-hover:opacity-100">
-                  Clear
-                </span>{" "}
-                <Cross className="w-3 h-3" />
-              </button>
-            </Transition.Child>
-          </Transition>
-        </div>
+                <div className="w-full h-full md:h-[calc(100vh_+_20px)] bg-white dark:bg-slate-700 overflow-y-scroll pt-8">
+                  <button
+                    onClick={() => {
+                      event({
+                        action: "clear_text",
+                        category: "user_interaction",
+                        label: "Clear recipe text",
+                      });
+                      const body = document.getElementsByTagName("body")[0];
+                      body.style.overflow = "auto";
+                      setText("");
+                    }}
+                    className="flex items-center gap-2 px-4 py-1 ml-auto mr-6 text-sm transition-opacity border border-red-400 rounded-full lg:gap-0 text-rose-600 dark:bg-red-600 dark:text-red-300 hover:gap-2 group w-fit dark:bg-opacity-30 dark:hover:bg-opacity-70 flex-nowrap"
+                  >
+                    <span className="w-auto lg:w-0 lg:opacity-0 overflow-hidden transition-all group-hover:w-[50px] group-hover:opacity-100">
+                      Clear
+                    </span>{" "}
+                    <Cross className="w-3 h-3" />
+                  </button>
+                  <ReactMarkdown className="w-full px-6 prose-sm prose md:prose-base dark:bg-transparent dark:shadow-none py-7 rounded-xl prose-headings:text-purple-500 dark:prose-p:text-slate-200 dark:prose-li:text-slate-300 dark:prose-strong:text-purple-500">
+                    {text ?? ""}
+                  </ReactMarkdown>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
     </div>
   );
