@@ -81,7 +81,7 @@ export default function Nav() {
   };
 
   return (
-    <header className="absolute top-0 flex items-center justify-between w-full px-5 py-5 lg:px-20">
+    <header className="absolute top-0 z-20 flex items-center justify-between w-full px-5 py-5 lg:px-20">
       <button
         onClick={() => setTheme(theme === "light" ? "dark" : "light")}
         className={cn(

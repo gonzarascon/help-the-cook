@@ -202,7 +202,7 @@ const Home: NextPage = () => {
           {!!text && !recipeMutation.isError && (
             <motion.div transition={{ delayChildren: 0.2 }}>
               <motion.div
-                className="absolute inset-0 w-screen h-screen bg-black"
+                className="absolute inset-0 z-50 w-screen h-screen bg-black"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.3 }}
                 exit={{ opacity: 0 }}
